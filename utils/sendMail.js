@@ -20,27 +20,23 @@ export const sendEmailToMembers = async (members, program) => {
 
         <h3 style="color:#d84315;">${program.title}</h3>
 
-        ${program.image ? `
-          <img src="http://localhost:5000${program.image}" 
-            alt="Program Image"
-            style="width:100%; max-height:300px; object-fit:cover; border-radius:10px; margin:10px 0;">
-        ` : ""}
+        ${
+          program.image
+            ? `<img src="cid:programimg" style="width:100%; max-height:300px; object-fit:cover; border-radius:10px; margin:10px 0;">`
+            : ""
+        }
 
-        <p style="font-size:16px; color:#333;">
-          ${program.description}
-        </p>
+        <p style="font-size:16px; color:#333;">${program.description}</p>
 
         <p style="font-size:16px;">
           <strong>📅 Date:</strong> ${new Date(program.date).toLocaleDateString()} <br>
           <strong>📍 Location:</strong> ${program.location}
         </p>
 
-        
-
         <br>
         <hr>
         <p style="font-size:14px; color:#555; text-align:center;">
-          With love and peace,<br>
+          With peace and harmony,<br>
           <strong>GMKV Yoga Trust</strong>
         </p>
       </div>
@@ -49,12 +45,21 @@ export const sendEmailToMembers = async (members, program) => {
 
   const mailList = members.map((m) => m.email);
 
-  const mailOptions = {
+  await transporter.sendMail({
     from: `"GMKV Yoga Trust" <${process.env.EMAIL_USER}>`,
     to: mailList,
     subject,
     html: htmlMessage,
-  };
+    attachments: program.image
+      ? [
+          {
+            filename: program.image.split("/").pop(),
+            path: `.${program.image}`, // local uploads image
+            cid: "programimg",
+          },
+        ]
+      : [],
+  });
 
-  await transporter.sendMail(mailOptions);
+  console.log("📩 Email sent with image");
 };
